@@ -1,0 +1,19 @@
+[package]
+name = "jolt_verifier_canister"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[features]
+default = []
+export-api = []
+
+[dependencies]
+candid = "0.10"
+hex = "0.4"
+ic-canister = { git = "https://github.com/infinity-swap/canister-sdk", package = "ic-canister", tag = "v0.14.x" }
+ic-exports = { git = "https://github.com/infinity-swap/canister-sdk", package = "ic-exports", tag = "v0.14.x" }
+ic-stable-structures = "0.6"
+serde = "1.0"
+thiserror = "1.0"

@@ -1,0 +1,12 @@
+type Error = variant {
+  Internal : text;
+  NotAuthorized;
+  CallError : text;
+  StableError : text;
+};
+type InitData = record { owner : principal };
+type Result = variant { Ok; Err : Error };
+service : (InitData) -> {
+  get_owner : () -> (principal) query;
+  set_owner : (principal) -> (Result);
+}

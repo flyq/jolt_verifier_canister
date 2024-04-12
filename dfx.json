@@ -1,0 +1,10 @@
+{
+    "canisters": {
+        "jolt_verifier_canister": {
+            "build": "",
+            "candid": "build/jolt_verifier_canister.did",
+            "wasm": "build/jolt_verifier_canister.wasm",
+            "type": "custom"
+        }
+    }
+}

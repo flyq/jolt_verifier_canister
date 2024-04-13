@@ -45,6 +45,12 @@ impl VerifierCanister {
         Ok(())
     }
 
+    #[query]
+    pub fn verify_jolt_proof(&self, proof: Vec<u8>, preprocessing: Vec<u8>) -> Result<bool> {
+        // let proof =
+        Ok(true)
+    }
+
     fn check_owner(&self, principal: Principal) -> Result<()> {
         let owner = self.state.config.get_owner();
         if owner == principal || owner == Principal::anonymous() {

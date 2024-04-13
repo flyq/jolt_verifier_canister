@@ -1,5 +1,6 @@
 mod canister;
 pub mod error;
+pub mod jolt;
 pub mod state;
 
 pub use crate::canister::VerifierCanister;

@@ -46,7 +46,12 @@ impl VerifierCanister {
     }
 
     #[query]
-    pub fn verify_jolt_proof(&self, proof: Vec<u8>, preprocessing: Vec<u8>) -> Result<bool> {
+    pub fn verify_jolt_proof(
+        &self,
+        proof: Vec<u8>,
+        commitments: Vec<u8>,
+        preprocessing: Vec<u8>,
+    ) -> Result<bool> {
         // let proof =
         Ok(true)
     }

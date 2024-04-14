@@ -10,7 +10,6 @@ default = []
 export-api = []
 
 [dependencies]
-ark-bn254 = { version = "0.4.0", default-features = false, optional = true }
 candid = "0.10"
 hex = "0.4"
 ic-canister = { git = "https://github.com/infinity-swap/canister-sdk", package = "ic-canister", tag = "v0.14.x" }
@@ -19,3 +18,8 @@ ic-stable-structures = "0.6"
 jolt-core = { git = "https://github.com/a16z/jolt" }
 serde = "1.0"
 thiserror = "1.0"
+
+[patch.crates-io]
+ark-ff = { git = "https://github.com/a16z/arkworks-algebra", branch = "optimize/field-from-u64" }
+ark-ec = { git = "https://github.com/a16z/arkworks-algebra", branch = "optimize/field-from-u64" }
+ark-serialize = { git = "https://github.com/a16z/arkworks-algebra", branch = "optimize/field-from-u64" }

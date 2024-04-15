@@ -31,3 +31,8 @@ dfx canister install jolt_verifier_canister --argument "record { owner=principal
 # dfx canister install jolt_verifier_canister --argument "record { owner=principal \"yhy6j-huy54-mkzda-m26hc-yklb3-dzz4l-i2ykq-kr7tx-dhxyf-v2c2g-tae\"; ecdsa_env=variant {TestKeyLocalDevelopment}}" --upgrade-unchanged -m=upgrade 
 
 dfx canister call jolt_verifier_canister get_owner
+
+cargo run --release -p helper upload_preprocess
+
+dfx canister call jolt_verifier_canister get_buffer '(0:nat8)'
+```

@@ -1,5 +1,6 @@
 use std::borrow::Cow;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 use ark_bn254::{Fr, G1Projective};
 use candid::Principal;
@@ -22,6 +23,8 @@ pub struct State {
     pub config: Config,
 
     pub preprocess: JoltPreprocessing<Fr, G1Projective>,
+
+    pub buffer: HashMap<u8, Vec<u8>>,
 }
 
 impl State {

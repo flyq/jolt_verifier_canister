@@ -8,8 +8,10 @@ type InitData = record { owner : principal };
 type Result = variant { Ok; Err : Error };
 type Result_1 = variant { Ok : bool; Err : Error };
 service : (InitData) -> {
+  get_buffer : (nat8) -> (opt blob) query;
   get_owner : () -> (principal) query;
-  preprocessing : (blob) -> (Result);
+  preprocessing : () -> (Result);
   set_owner : (principal) -> (Result);
+  upload_preprocessing_buffer : (nat8, blob) -> (Result);
   verify_jolt_proof : (blob) -> (Result_1) query;
 }

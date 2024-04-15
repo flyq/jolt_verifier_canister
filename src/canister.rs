@@ -56,9 +56,28 @@ impl VerifierCanister {
     }
 
     #[update]
-    pub fn preprocessing(&mut self, preprocess: Vec<u8>) -> Result<()> {
-        self.state.preprocess = deserialize_preprocessing(&preprocess);
+    pub fn upload_preprocessing_buffer(&mut self, idx: u8, preprocess: Vec<u8>) -> Result<()> {
+        self.state.buffer.insert(idx, preprocess);
         Ok(())
+    }
+
+    #[update]
+    pub fn preprocessing(&mut self) -> Result<()> {
+        let mut buffer = Vec::new();
+        for i in 0..25 {
+            let idx = i as u8;
+            if self.state.buffer.get(&idx).is_none() {
+                return Err(Error::Internal(format!("Buffer {} is missing", idx)));
+            }
+            buffer.extend(self.state.buffer.get(&idx).unwrap());
+        }
+        self.state.preprocess = deserialize_preprocessing(&buffer);
+        Ok(())
+    }
+
+    #[query]
+    pub fn get_buffer(&self, idx: u8) -> Option<Vec<u8>> {
+        self.state.buffer.get(&idx).cloned()
     }
 
     fn check_owner(&self, principal: Principal) -> Result<()> {

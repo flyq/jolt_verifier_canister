@@ -1,11 +1,13 @@
 use std::borrow::Cow;
 use std::cell::RefCell;
 
+use ark_bn254::{Fr, G1Projective};
 use candid::Principal;
 use candid::{CandidType, Decode, Deserialize, Encode};
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager};
 use ic_stable_structures::storable::Bound;
 use ic_stable_structures::{DefaultMemoryImpl, Storable};
+use jolt_core::jolt::vm::JoltPreprocessing;
 
 use crate::state::config::Config;
 
@@ -18,6 +20,8 @@ const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(1);
 pub struct State {
     /// Minter canister configuration.
     pub config: Config,
+
+    pub preprocess: JoltPreprocessing<Fr, G1Projective>,
 }
 
 impl State {

@@ -5,18 +5,27 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+members = ["helper"]
+
 [features]
 default = []
 export-api = []
 
 [dependencies]
+ark-bn254 = "0.4"
+ark-serialize = "0.4"
 candid = "0.10"
 hex = "0.4"
 ic-canister = { git = "https://github.com/infinity-swap/canister-sdk", package = "ic-canister", tag = "v0.14.x" }
 ic-exports = { git = "https://github.com/infinity-swap/canister-sdk", package = "ic-exports", tag = "v0.14.x" }
 ic-stable-structures = "0.6"
-jolt-core = { git = "https://github.com/a16z/jolt" }
+# jolt-core = { git = "https://github.com/flyq/jolt" }
+jolt-core = { path = "../jolt/jolt-core" }
+jolt-common = { path = "../jolt/common", package = "common" }
+jolt-sdk = { path = "../jolt/jolt-sdk", features = ["std"] }
 serde = "1.0"
+serde_json = "1.0"
 thiserror = "1.0"
 
 [patch.crates-io]

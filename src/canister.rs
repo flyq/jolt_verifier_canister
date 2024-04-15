@@ -4,6 +4,7 @@ use ic_exports::candid::Principal;
 use ic_exports::ic_kit::ic;
 
 use crate::error::{Error, Result};
+use crate::jolt::{deserialize_preprocessing, deserialize_proof, verify};
 use crate::state::{Settings, State};
 
 /// A canister to transfer funds between IC token canisters and EVM canister contracts.
@@ -46,14 +47,18 @@ impl VerifierCanister {
     }
 
     #[query]
-    pub fn verify_jolt_proof(
-        &self,
-        proof: Vec<u8>,
-        commitments: Vec<u8>,
-        preprocessing: Vec<u8>,
-    ) -> Result<bool> {
-        // let proof =
-        Ok(true)
+    pub fn verify_jolt_proof(&self, proof: Vec<u8>) -> Result<bool> {
+        ic_exports::ic_cdk::println!("{:?}", proof.len());
+
+        let proof = deserialize_proof(&proof);
+
+        Ok(verify(self.state.preprocess.clone(), proof))
+    }
+
+    #[update]
+    pub fn preprocessing(&mut self, preprocess: Vec<u8>) -> Result<()> {
+        self.state.preprocess = deserialize_preprocessing(&preprocess);
+        Ok(())
     }
 
     fn check_owner(&self, principal: Principal) -> Result<()> {

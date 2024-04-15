@@ -16,7 +16,8 @@ use jolt_core::jolt::vm::{rv32i_vm::RV32IJoltVM, Jolt, JoltPreprocessing};
 async fn main() {
     let args: Vec<String> = env::args().collect();
     match args[1].as_str() {
-        "generate_preprocess" => preprocess(),
+        "generate_preprocess" => generate_preprocess(),
+        "check_split" => check_split(),
         "upload_preprocess" => upload_preprocess().await,
         "call_preprocess" => call_preprocess().await,
         "call_verify" => call_verify().await,
@@ -24,7 +25,7 @@ async fn main() {
     }
 }
 
-fn preprocess() {
+fn generate_preprocess() {
     let mut program = Program::new("guest");
     program.set_func("fib");
     program.elf = Some(
@@ -43,7 +44,7 @@ fn preprocess() {
     println!("buffer size: {}", buffer.len());
 
     for i in 0..25 {
-        let name = format!("preprocess/p{}.bin", i);
+        let name = format!("data/p{}.bin", i);
         let mut file = File::create(name).unwrap();
 
         if i < 24 {
@@ -56,8 +57,26 @@ fn preprocess() {
             file.write_all(temp).unwrap();
         }
     }
-    let file = File::create("preprocess.bin").unwrap();
+    let file = File::create("data/preprocess.bin").unwrap();
     preprocessing.serialize_compressed(file).unwrap();
+}
+
+fn check_split() {
+    let mut file = File::open("data/preprocess.bin").unwrap();
+    let mut preprocess = Vec::new();
+    file.read_to_end(&mut preprocess).unwrap();
+
+    let mut buffer: Vec<u8> = Vec::new();
+
+    for i in 0..25 {
+        let name = format!("data/p{}.bin", i);
+        let mut file = File::open(name).unwrap();
+        let mut temp = Vec::new();
+        file.read_to_end(&mut temp).unwrap();
+        buffer.extend(temp);
+    }
+
+    assert_eq!(buffer, preprocess);
 }
 
 async fn upload_preprocess() {
@@ -70,32 +89,23 @@ async fn upload_preprocess() {
 
     let canister_id = Principal::from_text("bnz7o-iuaaa-aaaaa-qaaaa-cai").unwrap();
 
-    // let mut buffer = Vec::new();
-    for i in 0..25u8 {
-        let name = format!("preprocess/p{}.bin", i);
+    for i in 0..25u32 {
+        let name = format!("data/p{}.bin", i);
         let mut file = File::open(name).unwrap();
-        let mut preprocess = Vec::new();
-        file.read_to_end(&mut preprocess).unwrap();
+        let mut temp = Vec::new();
+        file.read_to_end(&mut temp).unwrap();
 
-        println!("preprocess size: {}", preprocess.len());
-
-        // buffer.extend(preprocess);
+        println!("{}th, part preprocess size: {}", i, temp.len());
 
         let res = agent
             .update(&canister_id, "upload_preprocessing_buffer")
-            .with_arg(Encode!(&i, &preprocess).unwrap())
+            .with_arg(Encode!(&i, &temp).unwrap())
             .call_and_wait()
             .await
             .unwrap();
 
         println!("{:?}", Decode!(&res));
     }
-
-    // let mut file = File::open("preprocess.bin").unwrap();
-    // let mut preprocess = Vec::new();
-    // file.read_to_end(&mut preprocess).unwrap();
-
-    // assert_eq!(buffer, preprocess);
 }
 
 async fn call_preprocess() {
@@ -106,10 +116,6 @@ async fn call_preprocess() {
 
     agent.fetch_root_key().await.unwrap();
 
-    let mut file = File::open("preprocess.bin").unwrap();
-    let mut preprocess = Vec::new();
-    file.read_to_end(&mut preprocess).unwrap();
-
     let canister_id = Principal::from_text("bnz7o-iuaaa-aaaaa-qaaaa-cai").unwrap();
 
     let res = agent
@@ -119,7 +125,7 @@ async fn call_preprocess() {
         .await
         .unwrap();
 
-    println!("{:?}", res);
+    println!("{:?}", Decode!(&res));
 }
 
 async fn call_verify() {

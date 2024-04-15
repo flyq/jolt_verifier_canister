@@ -32,7 +32,16 @@ dfx canister install jolt_verifier_canister --argument "record { owner=principal
 
 dfx canister call jolt_verifier_canister get_owner
 
+cargo run --release -p helper generate_preprocess
+
+cargo run --release -p helper check_split
 cargo run --release -p helper upload_preprocess
 
-dfx canister call jolt_verifier_canister get_buffer '(0:nat8)'
+dfx canister call jolt_verifier_canister get_buffer '(24:nat32)'
+
+cargo run --release -p helper call_preprocess
+
+cargo run --release -p helper call_verify
+
+
 ```

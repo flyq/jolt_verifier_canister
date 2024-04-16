@@ -16,7 +16,7 @@ And the Jolt development team encourages the implementation of [on-chain Verifie
 
 [IC(Internet Computer)](https://internetcomputer.org/) is the most powerful smart contract platform I have ever seen. One of its smart contracts can run a complete EVM, including json rpc, processing signatures, and EVM execution and output. Or being able to run a database, a sequencer of Bitcoin inscriptions, etc.
 
-Putting zk's verifier on an IC might do some weird things.
+Putting zk's verifier on an IC can bring some benefits:
 1. IC is powerful enough and not so picky about the Verifier program. In fact, there is a balance between the prover and the verifier. Some SNARKs can obtain the smallest proof size and fast verification algorithm, but they are very unfriendly to the prover. Some SNARKs may have a larger proof size and a more complicated verification algorithm. But the performance of the proof program has been greatly improved. Due to the performance limitations of smart contracts, Ethereum can often only verify the former type of SNARK. But Sumcheck-based Jolt falls into the latter category.
 2. IC's smart contract has the most complete support for Rust and can use std, so it can directly reuse the implementation of ZK Library. and reduce potential implementation errors.
 3. IC's chain key ECDSA can directly call platforms such as Ethereum/BTC, and the verification results can also be used to notify Ethereum, etc.
@@ -24,6 +24,12 @@ Putting zk's verifier on an IC might do some weird things.
 For code implementation details, refer [here](https://hackmd.io/@liquan/S1dybGcl0).
 
 The canister is already running on the chain: https://p6xvw-7iaaa-aaaap-aaana-cai.raw.ic0.app/
+
+## How
+
+For specific programs, Jolt generates their circuits as well as proofs. The circuit is contained in the huge `JoltPreprocessing`, which is about 48MB, and Proof is 500kb-10MB depending on the size of the program. We need to upload `JoltPreprocessing` and `Proof` in parts first, then assemble them in Canister, and then call verifier to verify them.
+
+For example, for the Fibonacci function, its `JoltPreprocessing` is certain, so when verifying `fib(10)` and `fib(50)`, use the same `JoltPreprocessing` and different `Proof`s to verify.
 
 ## Requirement
 

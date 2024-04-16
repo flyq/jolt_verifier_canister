@@ -60,7 +60,7 @@ impl VerifierCanister {
         Ok(())
     }
 
-    #[query]
+    #[update]
     pub fn verify_jolt_proof(&self) -> Result<bool> {
         PREPROCESS.with(|preprocess| {
             let preprocess = preprocess.borrow();
@@ -74,6 +74,8 @@ impl VerifierCanister {
 
     #[update]
     pub fn upload_preprocessing_buffer(&mut self, idx: u32, preprocess: Vec<u8>) -> Result<()> {
+        ic_exports::ic_cdk::println!("preprocessing buffer size: {:?}", preprocess.len());
+
         BUFFER.with(|buffer| {
             buffer.borrow_mut().insert(idx, preprocess);
         });

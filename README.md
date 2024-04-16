@@ -39,9 +39,10 @@ cargo run --release -p helper upload_preprocess
 
 dfx canister call jolt_verifier_canister get_buffer '(24:nat32)'
 
-cargo run --release -p helper call_preprocess
+# cargo run --release -p helper call_preprocess
+dfx canister call jolt_verifier_canister preprocessing
 
-cargo run --release -p helper call_verify
+cargo run --release -p helper update_proof
 
-
+dfx canister call jolt_verifier_canister verify_jolt_proof
 ```

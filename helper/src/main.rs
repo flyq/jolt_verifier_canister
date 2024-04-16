@@ -20,7 +20,7 @@ async fn main() {
         "check_split" => check_split(),
         "upload_preprocess" => upload_preprocess().await,
         "call_preprocess" => call_preprocess().await,
-        "call_verify" => call_verify().await,
+        "update_proof" => update_proof().await,
         _ => panic!("Invalid command"),
     }
 }
@@ -77,6 +77,8 @@ fn check_split() {
     }
 
     assert_eq!(buffer, preprocess);
+
+    println!("Split and merge successfully");
 }
 
 async fn upload_preprocess() {
@@ -128,7 +130,7 @@ async fn call_preprocess() {
     println!("{:?}", Decode!(&res));
 }
 
-async fn call_verify() {
+async fn update_proof() {
     let agent = Agent::builder()
         .with_url("http://localhost:4943")
         .build()
@@ -143,11 +145,11 @@ async fn call_verify() {
     let canister_id = Principal::from_text("bnz7o-iuaaa-aaaaa-qaaaa-cai").unwrap();
 
     let res = agent
-        .query(&canister_id, "verify_jolt_proof")
+        .update(&canister_id, "update_proof")
         .with_arg(Encode!(&proof).unwrap())
-        .call()
+        .call_and_wait()
         .await
         .unwrap();
 
-    println!("{:?}", res);
+    println!("{:?}", Decode!(&res));
 }

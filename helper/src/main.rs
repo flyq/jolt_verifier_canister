@@ -95,16 +95,18 @@ fn check_split() {
 
 async fn upload_preprocess() {
     let agent = Agent::builder()
-        .with_url("http://localhost:4943")
+        // .with_url("http://localhost:4943")
+        .with_url("https://ic0.app")
         .build()
         .unwrap();
 
     agent.fetch_root_key().await.unwrap();
 
-    let canister_id = Principal::from_text("bnz7o-iuaaa-aaaaa-qaaaa-cai").unwrap();
+    // let canister_id: Principal = Principal::from_text("bnz7o-iuaaa-aaaaa-qaaaa-cai").unwrap();
+    let canister_id = Principal::from_text("p6xvw-7iaaa-aaaap-aaana-cai").unwrap();
 
     for i in 0..25u32 {
-        let name = format!("data/sha3/p{}.bin", i);
+        let name = format!("data/fib/p{}.bin", i);
         let mut file = File::open(name).unwrap();
         let mut temp = Vec::new();
         file.read_to_end(&mut temp).unwrap();
@@ -144,16 +146,18 @@ async fn call_preprocess() {
 
 async fn upload_proof() {
     let agent = Agent::builder()
-        .with_url("http://localhost:4943")
+        // .with_url("http://localhost:4943")
+        .with_url("https://ic0.app")
         .build()
         .unwrap();
 
     agent.fetch_root_key().await.unwrap();
 
-    let canister_id = Principal::from_text("bnz7o-iuaaa-aaaaa-qaaaa-cai").unwrap();
+    // let canister_id = Principal::from_text("bnz7o-iuaaa-aaaaa-qaaaa-cai").unwrap();
+    let canister_id = Principal::from_text("p6xvw-7iaaa-aaaap-aaana-cai").unwrap();
 
     for i in 0..1u32 {
-        let name = format!("data/sha3/sha3.bin");
+        let name = format!("data/fib/fib50.bin");
         let mut file = File::open(name).unwrap();
         let mut temp = Vec::new();
         file.read_to_end(&mut temp).unwrap();

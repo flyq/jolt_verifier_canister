@@ -2,6 +2,9 @@
 
 For implementation details, refer [here](https://hackmd.io/@liquan/S1dybGcl0).
 
+
+The canister is already running on the chain: https://p6xvw-7iaaa-aaaap-aaana-cai.raw.ic0.app/
+
 ## Requirement
 
 [ic-wasm](https://github.com/dfinity/ic-wasm)
@@ -174,3 +177,5 @@ Error: Failed update call.
 Caused by: Failed update call.
   The replica returned a rejection error: reject code CanisterError, reject message Canister bnz7o-iuaaa-aaaaa-qaaaa-cai exceeded the instruction limit for single message execution., error code None
 ```
+
+It can be seen that the verification of sha2 and sha3 does need to wait for [the optimization of Verifier](https://github.com/a16z/jolt/issues/216)

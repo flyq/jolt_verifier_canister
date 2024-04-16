@@ -1,7 +1,27 @@
 # jolt_verifier_canister
 
-For implementation details, refer [here](https://hackmd.io/@liquan/S1dybGcl0).
+## background
 
+A zero-knowledge proof is a way of proving the validity of a statement without revealing the statement itself. The ‘prover’ is the party trying to prove a claim, while the ‘verifier’ is responsible for validating the claim. It provides core technical support in use cases such as private transactions, verifiable computing (Off-chain scaling solutions, aka Layer2).
+
+Thanks to the needs arising in the blockchain field, such as zkRollup, private transactions, etc., the theory and engineering in the ZKP field have developed rapidly in recent years. To use the power brought by ZKP, on-chain verifier are almost indispensable. For example, all Ethereum zkRollups has a Verifier implemented using Solidity running on Ethereum Layer1, and when withdrawing Tornado cash, you also need to verify the merkle proof you generated in the Tornado smart contract.
+
+On April 9th, the A16z crypto team released the fastest zkVM for prover: Jolt(Just One Lookup Table), including [code](https://github.com/a16z/jolt), [examples](https://github.com/a16z/jolt/tree/main/examples), [documents](https://jolt.a16zcrypto.com/), [blogs](https://a16zcrypto.com/posts/tags/lasso-jolt), and papers([Lasso](https://eprint.iacr.org/2023/1216.pdf) and [Jolt](https://eprint.iacr.org/2023/1217.pdf)).
+
+> Jolt is a zkVM (zero knowledge virtual machine) – a SNARK that lets the prover prove that it correctly ran a specified computer program, where the program is written in the assembly language of some simple CPU. zkVMs offer a fantastic developer experience: They make SNARKs usable by anyone who can write a computer program, eliminating the need for in-depth cryptographic knowledge. But usability comes at a steep price. Today’s zkVMs are remarkably complicated and offer terrible performance for the prover. Today, *proving* a computer program was run correctly is millions of times slower than simply *running* the program.
+> 
+> from [A new era in SNARK design: Releasing Jolt](https://a16zcrypto.com/posts/article/a-new-era-in-snark-design-releasing-jolt)
+
+And the Jolt development team encourages the implementation of [on-chain Verifier](https://github.com/a16z/jolt/issues/209).
+
+[IC(Internet Computer)](https://internetcomputer.org/) is the most powerful smart contract platform I have ever seen. One of its smart contracts can run a complete EVM, including json rpc, processing signatures, and EVM execution and output. Or being able to run a database, a sequencer of Bitcoin inscriptions, etc.
+
+Putting zk's verifier on an IC might do some weird things.
+1. IC is powerful enough and not so picky about the Verifier program. In fact, there is a balance between the prover and the verifier. Some SNARKs can obtain the smallest proof size and fast verification algorithm, but they are very unfriendly to the prover. Some SNARKs may have a larger proof size and a more complicated verification algorithm. But the performance of the proof program has been greatly improved. Due to the performance limitations of smart contracts, Ethereum can often only verify the former type of SNARK. But Sumcheck-based Jolt falls into the latter category.
+2. IC's smart contract has the most complete support for Rust and can use std, so it can directly reuse the implementation of ZK Library. and reduce potential implementation errors.
+3. IC's chain key ECDSA can directly call platforms such as Ethereum/BTC, and the verification results can also be used to notify Ethereum, etc.
+
+For code implementation details, refer [here](https://hackmd.io/@liquan/S1dybGcl0).
 
 The canister is already running on the chain: https://p6xvw-7iaaa-aaaap-aaana-cai.raw.ic0.app/
 

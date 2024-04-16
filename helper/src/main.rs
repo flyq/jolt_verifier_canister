@@ -16,24 +16,26 @@ use jolt_core::jolt::vm::{rv32i_vm::RV32IJoltVM, Jolt, JoltPreprocessing};
 async fn main() {
     let args: Vec<String> = env::args().collect();
     match args[1].as_str() {
-        "generate_preprocess" => generate_preprocess(),
+        "generate_preprocess" => generate_preprocess(args[2].as_str(), args[3].as_str()),
         "check_split" => check_split(),
         "upload_preprocess" => upload_preprocess().await,
         "call_preprocess" => call_preprocess().await,
+        "upload_proof" => upload_proof().await,
         "update_proof" => update_proof().await,
         _ => panic!("Invalid command"),
     }
 }
 
-fn generate_preprocess() {
-    let mut program = Program::new("guest");
-    program.set_func("fib");
-    program.elf = Some(
-        PathBuf::from_str(
-            "/tmp/jolt-guest-target-fibonacci-guest-fib/riscv32i-unknown-none-elf/release/guest",
-        )
-        .unwrap(),
-    );
+fn generate_preprocess(guest: &str, func: &str) {
+    let mut program = Program::new(guest);
+    program.set_func(func);
+
+    let target = format!("/tmp/jolt-guest-target-{}-{}", guest, func);
+
+    let elf = format!("{}/riscv32i-unknown-none-elf/release/guest", target,);
+
+    program.elf = Some(PathBuf::from_str(&elf).unwrap());
+
     let (bytecode, memory_init) = program.decode();
 
     let preprocessing: JoltPreprocessing<Fr, G1Projective> =
@@ -43,11 +45,12 @@ fn generate_preprocess() {
     preprocessing.serialize_compressed(&mut buffer).unwrap();
     println!("buffer size: {}", buffer.len());
 
-    for i in 0..25 {
-        let name = format!("data/p{}.bin", i);
+    let total = buffer.len() / 2_000_000 + 1;
+    for i in 0..total {
+        let name = format!("data/{}/p{}.bin", func, i);
         let mut file = File::create(name).unwrap();
 
-        if i < 24 {
+        if i < total - 1 {
             let temp = &buffer[i * 2_000_000..(i + 1) * 2_000_000];
             // write temp to file
             file.write_all(temp).unwrap();
@@ -57,28 +60,37 @@ fn generate_preprocess() {
             file.write_all(temp).unwrap();
         }
     }
-    let file = File::create("data/preprocess.bin").unwrap();
+
+    let name = format!("data/{}/preprocess.bin", func);
+
+    let file = File::create(name).unwrap();
     preprocessing.serialize_compressed(file).unwrap();
 }
 
 fn check_split() {
-    let mut file = File::open("data/preprocess.bin").unwrap();
-    let mut preprocess = Vec::new();
-    file.read_to_end(&mut preprocess).unwrap();
+    let mut file = File::open("data/sha2_chain/sha2_chain100.bin").unwrap();
+    let mut proof = Vec::new();
+    file.read_to_end(&mut proof).unwrap();
 
-    let mut buffer: Vec<u8> = Vec::new();
+    let mut file = File::create("data/sha2_chain/sha2_chain100_0.bin").unwrap();
+    file.write_all(&proof[..2_000_000]).unwrap();
 
-    for i in 0..25 {
-        let name = format!("data/p{}.bin", i);
-        let mut file = File::open(name).unwrap();
-        let mut temp = Vec::new();
-        file.read_to_end(&mut temp).unwrap();
-        buffer.extend(temp);
-    }
+    let mut file = File::create("data/sha2_chain/sha2_chain100_1.bin").unwrap();
+    file.write_all(&proof[2_000_000..]).unwrap();
 
-    assert_eq!(buffer, preprocess);
+    // let mut buffer: Vec<u8> = Vec::new();
 
-    println!("Split and merge successfully");
+    // for i in 0..25 {
+    //     let name = format!("data/fib/p{}.bin", i);
+    //     let mut file = File::open(name).unwrap();
+    //     let mut temp = Vec::new();
+    //     file.read_to_end(&mut temp).unwrap();
+    //     buffer.extend(temp);
+    // }
+
+    // assert_eq!(preprocess10, buffer);
+
+    println!("successfully");
 }
 
 async fn upload_preprocess() {
@@ -92,7 +104,7 @@ async fn upload_preprocess() {
     let canister_id = Principal::from_text("bnz7o-iuaaa-aaaaa-qaaaa-cai").unwrap();
 
     for i in 0..25u32 {
-        let name = format!("data/p{}.bin", i);
+        let name = format!("data/sha3/p{}.bin", i);
         let mut file = File::open(name).unwrap();
         let mut temp = Vec::new();
         file.read_to_end(&mut temp).unwrap();
@@ -130,6 +142,35 @@ async fn call_preprocess() {
     println!("{:?}", Decode!(&res));
 }
 
+async fn upload_proof() {
+    let agent = Agent::builder()
+        .with_url("http://localhost:4943")
+        .build()
+        .unwrap();
+
+    agent.fetch_root_key().await.unwrap();
+
+    let canister_id = Principal::from_text("bnz7o-iuaaa-aaaaa-qaaaa-cai").unwrap();
+
+    for i in 0..1u32 {
+        let name = format!("data/sha3/sha3.bin");
+        let mut file = File::open(name).unwrap();
+        let mut temp = Vec::new();
+        file.read_to_end(&mut temp).unwrap();
+
+        println!("{}th, part preprocess size: {}", i, temp.len());
+
+        let res = agent
+            .update(&canister_id, "upload_proof_buffer")
+            .with_arg(Encode!(&i, &temp).unwrap())
+            .call_and_wait()
+            .await
+            .unwrap();
+
+        println!("{:?}", Decode!(&res));
+    }
+}
+
 async fn update_proof() {
     let agent = Agent::builder()
         .with_url("http://localhost:4943")
@@ -138,15 +179,11 @@ async fn update_proof() {
 
     agent.fetch_root_key().await.unwrap();
 
-    let mut file = File::open("proof.bin").unwrap();
-    let mut proof = Vec::new();
-    file.read_to_end(&mut proof).unwrap();
-
     let canister_id = Principal::from_text("bnz7o-iuaaa-aaaaa-qaaaa-cai").unwrap();
 
     let res = agent
         .update(&canister_id, "update_proof")
-        .with_arg(Encode!(&proof).unwrap())
+        .with_arg(Encode!(&0u32, &0u32).unwrap())
         .call_and_wait()
         .await
         .unwrap();

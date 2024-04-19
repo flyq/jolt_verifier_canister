@@ -39,7 +39,7 @@ fn generate_preprocess(guest: &str, func: &str) {
     let (bytecode, memory_init) = program.decode();
 
     let preprocessing: JoltPreprocessing<Fr, G1Projective> =
-        RV32IJoltVM::preprocess(bytecode, memory_init, 1 << 10, 1 << 10, 1 << 14);
+        RV32IJoltVM::preprocess(bytecode, memory_init, 1 << 20, 1 << 20, 1 << 24);
 
     let mut buffer: Vec<u8> = Vec::new();
     preprocessing.serialize_compressed(&mut buffer).unwrap();
